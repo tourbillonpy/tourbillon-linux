@@ -198,3 +198,57 @@ def get_disks_usage(agent):
             })
         yield from agent.async_push(points, db_config['name'])
     logger.info('get_disks_usage terminated')
+
+
+@asyncio.coroutine
+def get_network_usage(agent):
+    yield from agent.run_event.wait()
+    config = agent.pluginconfig['linux']
+    db_config = config['database']
+    logger.info('starting "get_disks_usage" task for "%s"',
+                config['hostname'])
+    try:
+        logger.debug('try to create the database...')
+        yield from agent.async_create_database(db_config['name'])
+        yield from agent.async_create_retention_policy(
+            '%s_rp' % db_config['name'],
+            db_config['duration'],
+            db_config['replication'],
+            db_config['name'])
+        logger.info('database "%s" created successfully', db_config['name'])
+    except:
+        pass
+
+    prev_io_counters = psutil.net_io_counters(pernic=True)
+
+    while agent.run_event.is_set():
+        yield from asyncio.sleep(config['network_usage_frequency'])
+        curr_io_counters = psutil.net_io_counters(pernic=True)
+        points = []
+
+        for interface in curr_io_counters:
+            curr = curr_io_counters[interface]
+            prev = prev_io_counters[interface]
+            data = {
+                'measurement': 'net_io_stats',
+                'tags': {
+                    'host': config['hostname'],
+                    'interface': interface
+                },
+                'fields': {
+                    'bytes_sent': curr.bytes_sent - prev.bytes_sent,
+                    'bytes_recv': curr.bytes_recv - prev.bytes_recv,
+                    'packets_sent': curr.packets_sent - prev.packets_sent,
+                    'packets_recv': curr.packets_recv - prev.packets_recv,
+                    'errin': curr.errin - prev.errin,
+                    'errout': curr.errout - prev.errout,
+                    'dropin': curr.dropin - prev.dropin,
+                    'dropout': curr.dropout - prev.dropout
+                }
+            }
+            points.append(data)
+
+        yield from agent.async_push(points, db_config['name'])
+        prev_io_counters = curr_io_counters
+
+    logger.info('get_disks_io_stats terminated')
