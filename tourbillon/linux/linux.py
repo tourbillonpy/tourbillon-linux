@@ -83,3 +83,94 @@ def get_memory_usage(agent):
                      swap.percent))
         yield from agent.async_push(points, 'linux')
     logger.info('get_memory_usage terminated')
+
+
+@asyncio.coroutine
+def get_disks_stats(agent):
+    yield from agent.run_event.wait()
+    config = agent.pluginconfig['linux']
+    db_config = config['database']
+    logger.info('starting "get_disks_stats" task for "%s"', config['hostname'])
+    try:
+        logger.debug('try to create the database...')
+        yield from agent.async_create_database(db_config['name'])
+        yield from agent.async_create_retention_policy(
+            '%s_rp' % db_config['name'],
+            db_config['duration'],
+            db_config['replication'],
+            db_config['name'])
+        logger.info('database "%s" created successfully', db_config['name'])
+    except:
+        pass
+
+
+    prev_stats = psutil.disk_io_counters(perdisk=True)
+
+    while agent.run_event.is_set():
+        yield from asyncio.sleep(config['frequency'])
+        curr_stats = psutil.disk_io_counters(perdisk=True)
+        points = []
+        for disk in curr_stats:
+            curr = curr_stats[disk]
+            prev = prev_stats[disk]
+            points.append({
+                'measurement': 'disk_io_stats',
+                'tags': {
+                    'host': config['hostname'],
+                    'disk': disk
+                },
+                'fields': {
+                    'read_count': curr.read_count - prev.read_count,
+                    'write_count': curr.write_count - prev.write_count,
+                    'read_bytes': curr.read_bytes - prev.read_bytes,
+                    'write_bytes': curr.write_bytes - prev.write_bytes,
+                    'read_time': curr.read_time - prev.read_time,
+                    'write_time': curr.write_time - prev.write_time,
+                }
+            })
+        yield from agent.async_push(points, db_config['name'])
+        prev_stats = curr_stats
+    logger.info('get_disks_stats terminated')
+
+
+@asyncio.coroutine
+def get_disks_iostatus(agent):
+    yield from agent.run_event.wait()
+    config = agent.pluginconfig['linux']
+    db_config = config['database']
+    logger.info('starting "get_disks_status" task for "%s"', config['hostname'])
+    try:
+        logger.debug('try to create the database...')
+        yield from agent.async_create_database(db_config['name'])
+        yield from agent.async_create_retention_policy(
+            '%s_rp' % db_config['name'],
+            db_config['duration'],
+            db_config['replication'],
+            db_config['name'])
+        logger.info('database "%s" created successfully', db_config['name'])
+    except:
+        pass
+
+    while agent.run_event.is_set():
+        yield from asyncio.sleep(config['frequency'])
+        status = psutil.disk_io_counters(perdisk=True)
+        points = []
+        for disk in curr_stats:
+            curr = status[disk]
+            points.append({
+                'measurement': 'disk_status',
+                'tags': {
+                    'host': config['hostname'],
+                    'disk': disk
+                },
+                'fields': {
+                    'read_count': curr.read_count,
+                    'write_count': curr.write_count,
+                    'read_bytes': curr.read_bytes,
+                    'write_bytes': curr.write_bytes,
+                    'read_time': curr.read_time,
+                    'write_time': curr.write_time,
+                }
+            })
+        yield from agent.async_push(points, db_config['name'])
+    logger.info('get_disks_stats terminated')
