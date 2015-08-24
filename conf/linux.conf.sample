@@ -1,0 +1,8 @@
+{
+	"database": {
+		"name": "linux",
+		"duration": "365d",
+		"replication": "1"
+	},
+	"hostname": "localhost"
+}
