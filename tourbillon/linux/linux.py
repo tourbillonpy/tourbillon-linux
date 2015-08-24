@@ -9,21 +9,10 @@ logger = logging.getLogger(__name__)
 @asyncio.coroutine
 def get_cpu_usage(agent):
     yield from agent.run_event.wait()
-    config = agent.pluginconfig['linux']
+    config = agent.config['linux']
     logger.info('starting "get_cpu_usage" task for "%s"', config['hostname'])
     db_config = config['database']
-    try:
-        logger.debug('try to create the database...')
-        yield from agent.async_create_database(db_config['name'])
-        yield from agent.async_create_retention_policy(
-            '{}_rp'.format(
-                           db_config['name']),
-                           db_config['duration'],
-                           db_config['replication'],
-                           db_config['name'])
-        logger.info('database "%s" created successfully', 'linux')
-    except:
-        pass
+    yield from agent.async_create_database(**db_config)
 
     while agent.run_event.is_set():
         yield from asyncio.sleep(config['cpu_usage_frequency'])
@@ -47,22 +36,11 @@ def get_cpu_usage(agent):
 @asyncio.coroutine
 def get_memory_usage(agent):
     yield from agent.run_event.wait()
-    config = agent.pluginconfig['linux']
+    config = agent.config['linux']
     logger.info('starting "get_memory_usage" task for "%s"',
                 config['hostname'])
     db_config = config['database']
-    try:
-        logger.debug('try to create the database...')
-        yield from agent.async_create_database(db_config['name'])
-        yield from agent.async_create_retention_policy(
-            '{}_rp'.format(
-                           db_config['name']),
-                           db_config['duration'],
-                           db_config['replication'],
-                           db_config['name'])
-        logger.info('database "%s" created successfully', db_config['name'])
-    except:
-        pass
+    yield from agent.async_create_database(**db_config)
 
     while agent.run_event.is_set():
         yield from asyncio.sleep(config['memory_usage_frequency'])
@@ -95,21 +73,13 @@ def get_memory_usage(agent):
 @asyncio.coroutine
 def get_disks_io_stats(agent):
     yield from agent.run_event.wait()
-    config = agent.pluginconfig['linux']
+    config = agent.config['linux']
     db_config = config['database']
+
     logger.info('starting "get_disks_io_stats" task for "%s"',
                 config['hostname'])
-    try:
-        logger.debug('try to create the database...')
-        yield from agent.async_create_database(db_config['name'])
-        yield from agent.async_create_retention_policy(
-            '%s_rp' % db_config['name'],
-            db_config['duration'],
-            db_config['replication'],
-            db_config['name'])
-        logger.info('database "%s" created successfully', db_config['name'])
-    except:
-        pass
+
+    yield from agent.async_create_database(**db_config)
 
     prev_stats = psutil.disk_io_counters(perdisk=True)
 
@@ -148,21 +118,12 @@ def get_disks_io_stats(agent):
 @asyncio.coroutine
 def get_disks_usage(agent):
     yield from agent.run_event.wait()
-    config = agent.pluginconfig['linux']
+    config = agent.config['linux']
     db_config = config['database']
     logger.info('starting "get_disks_usage" task for "%s"',
                 config['hostname'])
-    try:
-        logger.debug('try to create the database...')
-        yield from agent.async_create_database(db_config['name'])
-        yield from agent.async_create_retention_policy(
-            '%s_rp' % db_config['name'],
-            db_config['duration'],
-            db_config['replication'],
-            db_config['name'])
-        logger.info('database "%s" created successfully', db_config['name'])
-    except:
-        pass
+
+    yield from agent.async_create_database(**db_config)
 
     disk_partitions = psutil.disk_partitions()
     partition_mountpoint = dict()
@@ -203,21 +164,12 @@ def get_disks_usage(agent):
 @asyncio.coroutine
 def get_network_usage(agent):
     yield from agent.run_event.wait()
-    config = agent.pluginconfig['linux']
+    config = agent.config['linux']
     db_config = config['database']
     logger.info('starting "get_disks_usage" task for "%s"',
                 config['hostname'])
-    try:
-        logger.debug('try to create the database...')
-        yield from agent.async_create_database(db_config['name'])
-        yield from agent.async_create_retention_policy(
-            '%s_rp' % db_config['name'],
-            db_config['duration'],
-            db_config['replication'],
-            db_config['name'])
-        logger.info('database "%s" created successfully', db_config['name'])
-    except:
-        pass
+
+    yield from agent.async_create_database(**db_config)
 
     prev_io_counters = psutil.net_io_counters(pernic=True)
 
