@@ -11,19 +11,20 @@ def get_cpu_usage(agent):
     yield from agent.run_event.wait()
     config = agent.pluginconfig['linux']
     logger.info('starting "get_cpu_usage" task for "%s"', config['hostname'])
+    db_config = config['database']
     try:
         logger.debug('try to create the database...')
-        yield from agent.async_create_database('linux')
-        yield from agent.async_create_retention_policy('linux_rp',
-                                                       '365d',
-                                                       '1',
-                                                       'linux')
+        yield from agent.async_create_database(db_config['name'])
+        yield from agent.async_create_retention_policy('{}_rp'.format(db_config['name']),
+                                                       db_config['duration'],
+                                                       db_config['replication'],
+                                                       db_config['name'])
         logger.info('database "%s" created successfully', 'linux')
     except:
         pass
 
     while agent.run_event.is_set():
-        yield from asyncio.sleep(2)
+        yield from asyncio.sleep()
         cpu_percent = psutil.cpu_percent(interval=None)
         points = [{
             'measurement': 'cpu_usage',
@@ -37,7 +38,7 @@ def get_cpu_usage(agent):
         logger.debug('{}: cpu_usage={}%'.format(
                      config['hostname'],
                      cpu_percent))
-        yield from agent.async_push(points, 'linux')
+        yield from agent.async_push(points, db_config['name'])
     logger.info('get_cpu_usage terminated')
 
 
@@ -46,14 +47,15 @@ def get_memory_usage(agent):
     yield from agent.run_event.wait()
     config = agent.pluginconfig['linux']
     logger.info('starting "get_memory_usage" task for "%s"', config['hostname'])
+    db_config = config['database']
     try:
         logger.debug('try to create the database...')
-        yield from agent.async_create_database('linux')
-        yield from agent.async_create_retention_policy('linux_rp',
-                                                       '365d',
-                                                       '1',
-                                                       'linux')
-        logger.info('database "%s" created successfully', 'linux')
+        yield from agent.async_create_database(db_config['name'])
+        yield from agent.async_create_retention_policy('{}_rp'.format(db_config['name']),
+                                                       db_config['duration'],
+                                                       db_config['replication'],
+                                                       db_config['name'])
+        logger.info('database "%s" created successfully', db_config['name'])
     except:
         pass
 
@@ -81,5 +83,5 @@ def get_memory_usage(agent):
                      config['hostname'],
                      memory.percent,
                      swap.percent))
-        yield from agent.async_push(points, 'linux')
+        yield from agent.async_push(points, db_config['name'])
     logger.info('get_memory_usage terminated')
