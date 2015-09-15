@@ -15,7 +15,7 @@ if not PY34_PLUS:
 
 setup(
     name='tourbillon-linux',
-    version='0.1',
+    version='0.2',
     packages=find_packages(exclude=exclude),
     install_requires=install_requires,
     zip_safe=False,
