@@ -1,10 +1,10 @@
-.. Tourbillon Linux Plugin documentation master file, created by
+.. Tourbillon Celery Plugin documentation master file, created by
    sphinx-quickstart on Mon Aug 24 10:12:29 2015.
    You can adapt this file completely to your liking, but it should at least
    contain the root `toctree` directive.
 
-Welcome to Tourbillon Linux Plugin's documentation!
-===================================================
+Welcome to tourbillon-linux's documentation!
+====================================================
 
 Contents:
 
@@ -12,6 +12,10 @@ Contents:
    :maxdepth: 2
 
    about
+   install
+   configure
+   measurements
+
 
 Indices and tables
 ==================
