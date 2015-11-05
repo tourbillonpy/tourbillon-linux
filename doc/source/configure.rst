@@ -27,7 +27,8 @@ The tourbillon-linux configuration file looks like: ::
 	}
 
 
-You can customize the database name, the retencion policy and the broker url.
+You can customize the database name, the hostname with which datapoints are tagged,
+the frequency at which measures are collected and the disks and partitions that you want to  colect metrics for.
 
 
 Enable the tourbillon-linux metrics collectors
@@ -35,6 +36,18 @@ Enable the tourbillon-linux metrics collectors
 
 To enable the tourbillon-linux metrics collectors types the following command: ::
 
-	$ sudo -i tourbillon enable tourbillon.celery=get_celery_stats
+	$ sudo -i tourbillon enable tourbillon.linux=<collector_name>
+
+Where <collector_name> can be one of or a comma separated list of the colectors names within:
+	
+	* get_cpu_usage
+	* get_memory_usage
+	* get_disks_usage
+	* get_disks_io_stats
+	* get_net_io_stats
+
+
+
+
 
 
