@@ -174,11 +174,11 @@ def get_disks_usage(agent):
 
 
 @asyncio.coroutine
-def get_network_usage(agent):
+def get_net_io_stats(agent):
     yield From(agent.run_event.wait())
     config = agent.config['linux']
     db_config = config['database']
-    logger.info('starting "get_disks_usage" task for "%s"',
+    logger.info('starting "get_net_io_stats" task for "%s"',
                 config['hostname'])
 
     yield From(agent.async_create_database(**db_config))
