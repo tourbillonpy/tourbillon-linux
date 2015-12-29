@@ -16,7 +16,7 @@ if not PY34_PLUS:
 setup(
     name='tourbillon-linux',
     description='A tourbillon plugin for collecting metrics from linux.',
-    version='0.4',
+    version='0.4.1',
     packages=find_packages(exclude=exclude),
     install_requires=install_requires,
     zip_safe=False,
